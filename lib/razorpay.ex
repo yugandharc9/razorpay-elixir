@@ -3,6 +3,31 @@ defmodule Razorpay do
   @test_url "https://api.razorpay.com"
   @client_vsn Mix.Project.config[:version]
 
+  defp key_id do
+    value =
+      (Application.get_env(:razorpay, :key_id)
+      || System.get_env "RAZORPAY_KEY_ID")
+    if value, do: value, else: raise Razorpay.Error,
+      "Razorpay key_id or key_secret is missing"
+  end
+
+  defp key_secret do
+    value =
+      (Application.get_env(:razorpay, :key_secret)
+      || System.get_env "RAZORPAY_KEY_SECRET")
+    if value, do: value, else: raise Razorpay.Error,
+      "Razorpay key_id or key_secret is missing"
+  end
+
+  defp req_headers do
+    [{"User-Agent", "Razorpay-Elixir/#{@client_vsn}"}]
+  end
+
+  defp auth do
+    {key_id, key_secret}
+  end
+
+
   def request(method, endpoint \\ "/", opts \\ [])
 
   def request(:get, endpoint, opts) do
@@ -35,30 +60,8 @@ defmodule Razorpay do
     |> process_response
   end
 
-  defp req_headers do
-    [{"User-Agent", "Razorpay-Elixir/#{@client_vsn}"}]
-  end
 
-  defp key_id do
-    value =
-      (Application.get_env(:razorpay, :key_id)
-      || System.get_env "RAZORPAY_KEY_ID")
-    if value, do: value, else: raise Razorpay.Error,
-      "Razorpay key_id or key_secret is missing"
-  end
-
-  defp key_secret do
-    value =
-      (Application.get_env(:razorpay, :key_secret)
-      || System.get_env "RAZORPAY_KEY_SECRET")
-    if value, do: value, else: raise Razorpay.Error,
-      "Razorpay key_id or key_secret is missing"
-  end
-
-  defp auth do
-    {key_id, key_secret}
-  end
-
+ 
   defp process_url("/") do
     @test_url
   end
